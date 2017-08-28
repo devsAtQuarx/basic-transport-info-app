@@ -1,0 +1,706 @@
+<template>
+  <div>
+
+      <li v-for="bus in sorted_indirect_bus_arr">
+        {{bus.bus_1_no}} - {{bus.bus_1_type}} -
+        {{bus.bus_2_no}} - {{bus.bus_2_type}} -
+        {{bus.next_schedule}} -
+        {{bus.travel_time}}
+        <button @click="show_detail(bus)">detail ></button>
+      </li>
+  </div>
+</template>
+
+<script>
+import {mapGetters} from 'vuex'
+
+export default{
+  data(){
+    return{
+      indirect_bus_arr : [],
+      indirect_bus_flg : false
+    }
+  },
+  methods:{
+    show_detail(bus){
+      this.$store.state.show_detail = bus
+      this.$router.push('/detail')
+    },
+    get_indirect_routes(){
+      //this.$store.state.show_p_bar = true
+      this.indirect_bus_arr = []
+      //indirect search begins
+      let from_city = this.$store.state.from_city
+      //console.log(from_city)
+      let to_city = this.$store.state.to_city
+      //console.log(to_city)
+
+      this.$http.get('city_route_matrix/'+from_city.name+'.json')
+      .then(response=>{
+        let waypoints=response.body
+        this.indirect_bus_flg = false
+        for(let waypoint in Object.keys(waypoints)){
+          //console.log(Object.keys(waypoints)[waypoint])
+          this.$http.get('city_route_matrix/'+Object.keys(waypoints)[waypoint]
+            +'/'+to_city.name+'.json')
+          .then(response=>{
+            let routes_2 = response.body
+            if(routes_2 != null){ //here we start getting route, wp -> to
+              for(let route_2 in routes_2){
+               //if(this.$store.state.from_city.name.indexOf(routes_2[route_2]) == -1){
+                this.$http.get('city_route_matrix/'+from_city.name+'/'
+                  +Object.keys(waypoints)[waypoint]+'.json')
+                .then(response=>{
+                  let routes_1 = response.body
+                  for(let route_1 in routes_1){
+
+                  // if(this.$store.state.to_city.name.indexOf(routes_1[route_1])==-1){
+
+                    //console.log(route_1 + " " + route_2)
+                    //got_indirect_route_combo :)
+                    //console.log(this.$store.state.direct_bus_route_str)
+
+                     if(this.$store.state.direct_bus_route_str.indexOf(routes_1[route_1])==-1
+                     && this.$store.state.direct_bus_route_str.indexOf(routes_2[route_2]==-1)){
+
+                     //MORE CHECK ROUTE
+
+                      this.$http.get('bus_routes/'+routes_1[route_1]+'.json')
+                      .then(response=>{
+                        //console.log(response.body)
+                        let route_1_arr = response.body
+
+
+                        this.$http.get('bus_routes/'+routes_2[route_2]+'.json')
+                        .then(response=>{
+                          //console.log(response.body)
+                          let route_2_arr = response.body
+
+                            if(route_1_arr.indexOf(to_city.name)==-1){
+                              if(route_2_arr.indexOf(from_city.name)==-1){
+
+
+                                  //call get_bus
+                                  this.get_bus(routes_1[route_1],
+                                    Object.keys(waypoints)[waypoint],
+                                      routes_2[route_2], route_1_arr, route_2_arr)
+                                      this.indirect_bus_flg = true
+                                }
+                            }
+
+                          return response.json()
+                        })
+                        .then(response=>{
+                          //error
+                        })
+                        return response.json()
+
+                      })
+                      //MORE CHECK ROUTE ends
+
+                      .then(response=>{
+                        //error
+                      })
+
+                    }
+                  // }
+                  }
+                  return response.json()
+                })
+                .then(response=>{
+                  //error
+                })
+            //   }
+              }
+            }else{
+              //find 3 buses route
+              //this.$store.state.show_p_bar = false
+            }
+            return response.json()
+          })
+          .then(response=>{
+            //error
+          })
+        }
+        if(this.indirect_bus_flg == false){
+          //this.$store.state.show_p_bar = false
+        }
+        return response.json()
+      })
+      .then(response=>{
+        //error
+      })
+    },
+    //indirect search ends
+
+    get_bus(route_1, waypoint, route_2, route_1_arr, route_2_arr){
+      //console.log(route_1, waypoint, route_2)
+      this.$http.get('buses_on_route/'+route_1+'.json')
+      .then(response=>{
+        let buses_1 = response.body
+        //console.log(buses_1)
+        for(let bus_1 in buses_1){
+          this.$http.get('buses_on_route/'+route_2+'.json')
+          .then(response=>{
+            let buses_2 = response.body
+            //console.log(buses_2)
+            for(let bus_2 in buses_2){
+              //console.log(buses_1[bus_1]+" on "+route_1 + " | " +
+                //buses_2[bus_2]+" on "+route_2)
+              this.get_bus_type(buses_1[bus_1], route_1, waypoint, buses_2[bus_2], route_2,
+                route_1_arr, route_2_arr)
+            }
+            response.json()
+          })
+          .then(response=>{
+            //error
+          })
+        }
+        return response.json()
+      })
+      .then(response=>{
+        //error
+      })
+    },
+    //GET_BUS ends
+
+    get_bus_type(bus_1, route_1, waypoint, bus_2, route_2, route_1_arr, route_2_arr){
+      this.$http.get('bus_type/'+bus_1+'.json')
+      .then(response=>{
+        let bus_1_type = response.body
+
+        this.$http.get('bus_type/'+bus_2+'.json')
+        .then(response=>{
+          let bus_2_type = response.body
+
+          this.mark_on_route(bus_1, bus_1_type, route_1, waypoint, bus_2, bus_2_type,
+          route_2,  route_1_arr, route_2_arr)
+
+          return response.json()
+        })
+        .then(response=>{
+          //error
+        })
+
+        return response.json()
+      })
+      .then(response=>{
+        //error
+      })
+    },
+    //GET_BUS_TYPE ends
+
+    mark_on_route(bus_1, bus_1_type, route_1, waypoint, bus_2, bus_2_type, route_2,
+      route_1_arr, route_2_arr){
+
+        //this.$http.get('bus_routes/'+route_1+'.json')
+        //.then(response=>{
+         //let cities_1 = response.body
+         let cities_1 = route_1_arr
+         //console.log(cities_1)
+         let mark_from_1 = -1 , mark_to_1 = -1
+         for(let city_1 in cities_1){
+          //mark_from
+          if(cities_1[city_1] == this.$store.state.from_city.name){
+            mark_from_1 = city_1
+            //console.log(mark_from_1)
+          }
+          //mark_to
+          else if(cities_1[city_1] == waypoint){
+            mark_to_1 = city_1
+            //console.log(mark_to_1)
+          }
+          if(mark_from_1 != -1 && mark_to_1 != -1){
+            break
+          }
+         }
+
+         //mark on => route_2
+         //this.$http.get('bus_routes/'+route_2+'.json')
+         //.then(response=>{
+        //  let cities_2 = response.body
+          let cities_2 = route_2_arr
+          //console.log(cities_2)
+          let mark_from_2 = -1 , mark_to_2 = -1
+          for(let city_2 in cities_2){
+           //mark_from
+           if(cities_2[city_2] == waypoint){
+             mark_from_2 = city_2
+             //console.log(mark_from_2)
+           }
+           //mark_to
+           else if(cities_2[city_2] == this.$store.state.to_city.name){
+             mark_to_2 = city_2
+             //console.log(mark_to_2)
+           }
+           if(mark_to_2 != -1 && mark_to_2 != -1){
+
+           //call get_travel_time
+           this.get_all_schedule(bus_1 , bus_1_type, route_1, mark_from_1, mark_to_1,
+            waypoint, mark_from_2, mark_to_2, bus_2, bus_2_type, route_2)
+
+            break
+           }
+          }
+
+          /*return response.json()
+         })
+         .then(response=>{
+           //error
+         })
+
+         return response.json()
+      })
+      .then(response=>{
+        //error
+      })*/
+
+    },
+    //MARK ON ROUTE ends
+
+    get_all_schedule(bus_1 , bus_1_type, route_1, mark_from_1, mark_to_1,
+     waypoint, mark_from_2, mark_to_2, bus_2, bus_2_type, route_2){
+
+
+       this.$http.get('bus_time_from_origin/'+bus_1+'.json')
+       .then(response=>{
+          let bus_1_time = response.body
+          this.$http.get('bus_time_from_origin/'+bus_2+'.json')
+          .then(response=>{
+            let bus_2_time = response.body
+
+              this.check_combo_pos(bus_1,bus_1_type,route_1,mark_from_1,
+                mark_to_1,bus_1_time,waypoint,
+                bus_2_time,mark_from_2,mark_to_2,bus_2,bus_2_type,
+                route_2)
+
+            return response.json()
+          })
+          .then(response=>{
+            //error
+          })
+          return response.json()
+       })
+       .then(response=>{
+          //error
+       })
+
+    },
+    check_combo_pos(bus_1,bus_1_type,route_1,mark_from_1,
+      mark_to_1,bus_1_time,waypoint,
+      bus_2_time,mark_from_2,mark_to_2,bus_2,bus_2_type,
+      route_2){
+
+
+      this.$http.get('travel_time_on_route/'+route_1+'.json')
+      .then(response=>{
+        let bus_1_offsets=response.body
+        //console.log(bus_1_offsets)
+
+        let bus_1_from_offset = -1 , bus_1_to_offset = -1
+        for(let i in bus_1_offsets){
+          //
+          if(i == mark_from_1){
+            bus_1_from_offset = bus_1_offsets[i]
+          }else if(i == mark_to_1){
+            bus_1_to_offset = bus_1_offsets[i]
+          }
+          //
+          if(bus_1_from_offset != -1 && bus_1_to_offset != -1){
+
+            //bus_1_to_time
+
+            this.$http.get('travel_time_on_route/'+route_2+'.json')
+            .then(response=>{
+
+              let bus_2_offsets=response.body
+              //console.log(bus_2_offsets)
+
+              let bus_2_from_offset = -1 , bus_2_to_offset = -1
+              for(let j in bus_2_offsets){
+                //
+                if(j == mark_from_2){
+                  bus_2_from_offset = bus_2_offsets[j]
+                }else if(j == mark_to_2){
+                  bus_2_to_offset = bus_2_offsets[j]
+                }
+                //
+                if(bus_2_from_offset != -1 && bus_2_to_offset != -1){
+
+                let travel_time = bus_1_to_offset - bus_1_from_offset
+                  + bus_2_to_offset - bus_2_from_offset
+
+
+
+
+                  //current time
+                  let date = new Date()
+                  let hr = date.getHours()
+                  let min = date.getMinutes()
+                  //console.log("date-> "+ hr + " "+ min)
+
+                  let next_schedule_found = false
+                  //Bus_1 OriginTime + To_Offset = Bus_1_To_Time
+                  for(let k1 in bus_1_time){
+                    //console.log(bus_1_time[k1])
+
+                    //break down origin time bus_1
+                    let bus_1_time_hr =
+                      bus_1_time[k1].substring(0, bus_1_time[k1].indexOf(":"))
+                    let bus_1_time_min =
+                      bus_1_time[k1].substring(bus_1_time[k1].indexOf(":") + 1)
+                    //console.log(bus_1_time_hr + " " + bus_1_time_min)
+
+
+
+                    //jaha se chdna h ,wha kab pochegi
+                    let temp_1_bus_1_time_min = bus_1_time_min + bus_1_from_offset
+                    let new_from_bus_1_time_hr = Math.floor(bus_1_time_hr) +
+                      Math.floor(temp_1_bus_1_time_min/60)
+                    let new_from_bus_1_time_min = temp_1_bus_1_time_min%60
+                  //  console.log("from_time -> "+new_from_bus_1_time_hr + " " +
+                    //  new_from_bus_1_time_min)
+
+
+                    //add offset - when reach destination_time_bus_1
+                    let temp_bus_1_time_min = bus_1_time_min + bus_1_to_offset
+                    let new_bus_1_time_hr = Math.floor(bus_1_time_hr) +
+                      Math.floor(temp_bus_1_time_min/60)
+                    let new_bus_1_time_min = temp_bus_1_time_min%60
+
+
+                    if(new_from_bus_1_time_hr > hr ||
+                      (new_from_bus_1_time_hr == hr && new_from_bus_1_time_min > min) ){
+
+
+                        //find if match bus is there or not
+
+
+
+                        for(let k2 in bus_2_time){
+
+                          //break down origin time bus_1
+                          let bus_2_time_hr =
+                            bus_2_time[k2].substring(0, bus_2_time[k2].indexOf(":"))
+                          let bus_2_time_min =
+                            bus_2_time[k2].substring(bus_2_time[k2].indexOf(":") + 1)
+                          //console.log(bus_2_time_hr + " " + bus_2_time_min)
+
+
+                          //Bus_2_OriginTime + From_Offset = bus_2_from_time
+                          let temp_bus_2_time_min = bus_2_time_min + bus_2_from_offset
+                          let new_bus_2_time_hr = Math.floor(bus_2_time_hr) +
+                            Math.floor(temp_bus_2_time_min/60)
+                          let new_bus_2_time_min = temp_bus_2_time_min%60
+
+
+
+                          //Compare
+                          if( (new_bus_2_time_hr > new_bus_1_time_hr) ||
+                            (new_bus_2_time_hr == new_bus_1_time_hr &&
+                              new_bus_2_time_min > new_bus_1_time_min) ){
+
+
+                              //************** Print *************//
+                      /*      console.log(bus_1+" - "+bus_1_type+" On "+route_1 + " | " +
+                               mark_from_1 + " " + mark_to_1
+                               + " | " + bus_1_time + " | "+waypoint+" | " + bus_2_time +
+                               " | " + mark_from_2 + " " + mark_to_2 + " | " +
+                              bus_2+" - "+bus_2_type+" On "+route_2)
+
+                              console.log(bus_1_from_offset, bus_1_to_offset)
+                              console.log(bus_2_from_offset, bus_2_to_offset)
+
+                              console.log(travel_time)
+
+                              console.log(new_bus_1_time_hr+ " " + new_bus_1_time_min)
+                              console.log(new_bus_2_time_hr+ " " + new_bus_2_time_min)
+*/
+                              //************* Print ends ***********//
+
+                              //add padding to min (time)
+                              if(new_bus_1_time_min < 10){
+                                new_bus_1_time_min = "0" + new_bus_1_time_min
+                              }
+                              if(new_bus_2_time_min < 10){
+                                new_bus_2_time_min = "0" + new_bus_2_time_min
+                              }
+                              if(new_from_bus_1_time_min < 10){
+                                new_from_bus_1_time_min = "0" + new_from_bus_1_time_min
+                              }
+
+
+
+                              let add_to_travel_time_min
+                              let add_to_travel_time_hr
+                              let add_to_travel_time_min_final
+                              //more on travel_time
+                              if(new_bus_1_time_min > new_bus_2_time_min){ //problem
+                                new_bus_2_time_min = parseInt(new_bus_2_time_min) + 60
+                                //console.log(new_bus_2_time_min)
+                                new_bus_2_time_hr = new_bus_2_time_hr - 1
+                                //console.log(new_bus_2_time_hr )
+
+                                add_to_travel_time_min =
+                                  new_bus_2_time_min - parseInt(new_bus_1_time_min)
+                                add_to_travel_time_hr =
+                                  new_bus_2_time_hr - new_bus_1_time_hr
+                                add_to_travel_time_min_final = 60 * add_to_travel_time_hr
+                                  + add_to_travel_time_min
+                              }else{
+                                  add_to_travel_time_min =
+                                    new_bus_2_time_min - new_bus_1_time_min
+                                  add_to_travel_time_hr =
+                                    new_bus_2_time_hr - new_bus_1_time_hr
+                                  add_to_travel_time_min_final = 60 * add_to_travel_time_hr
+                                    + add_to_travel_time_min
+
+                              }
+                              //console.log("addition-> " + add_to_travel_time_min_final)
+                              travel_time = travel_time + add_to_travel_time_min_final
+
+                              let travel_time_hr =''
+                              if(travel_time >= 60)
+                                travel_time_hr  = parseInt(travel_time/60) + " hr "
+                              else
+                                travel_time_hr  = ''
+
+
+                              let travel_time_min = travel_time%60
+                              if(travel_time_min >= 10)
+                                travel_time_min = travel_time_min+ " min "
+                              else
+                                travel_time_min = "0"+travel_time_min+ " min "
+
+
+
+
+
+
+                              //Push to DOM
+                              let indirect_bus_obj = {
+                                bus_1_no : bus_1,
+                                bus_1_type : bus_1_type,
+
+
+                                bus_2_no : bus_2,
+                                bus_2_type:bus_2_type,
+
+                                travel_time : travel_time_hr + " " + travel_time_min,
+
+                                next_schedule : new_from_bus_1_time_hr+ ":" +
+                                  new_from_bus_1_time_min
+                              }
+
+                              this.indirect_bus_arr.push(indirect_bus_obj)
+                              this.$store.state.show_p_bar = false
+
+
+                              next_schedule_found = true
+                              break
+                          }
+                        }
+
+                        break
+                    }
+                  }
+                  if(next_schedule_found == false){
+
+                    //console.log("next_Sch not found")
+                    //break down origin time bus_1
+                    let bus_1_time_hr =
+                      bus_1_time[0].substring(0, bus_1_time[0].indexOf(":"))
+                    let bus_1_time_min =
+                      bus_1_time[0].substring(bus_1_time[0].indexOf(":") + 1)
+                    //console.log(bus_1_time_hr + " " + bus_1_time_min)
+
+
+                    //jaha se chdna h ,wha kab pochegi
+                    let temp_1_bus_1_time_min = bus_1_time_min + bus_1_from_offset
+                    let new_from_bus_1_time_hr = Math.floor(bus_1_time_hr) +
+                      Math.floor(temp_1_bus_1_time_min/60)
+                    let new_from_bus_1_time_min = temp_1_bus_1_time_min%60
+
+
+                    //add offset - when reach destination_time_bus_1
+                    let temp_bus_1_time_min = bus_1_time_min + bus_1_to_offset
+                    let new_bus_1_time_hr = Math.floor(bus_1_time_hr) +
+                      Math.floor(temp_bus_1_time_min/60)
+                    let new_bus_1_time_min = temp_bus_1_time_min%60
+
+
+                    //find if match bus is there or not
+
+                    for(let k2 in bus_2_time){
+
+                      //break down origin time bus_1
+                      let bus_2_time_hr =
+                        bus_2_time[k2].substring(0, bus_2_time[k2].indexOf(":"))
+                      let bus_2_time_min =
+                        bus_2_time[k2].substring(bus_2_time[k2].indexOf(":") + 1)
+                      //console.log(bus_2_time_hr + " " + bus_2_time_min)
+
+
+                      //Bus_2_OriginTime + From_Offset = bus_2_from_time
+                      let temp_bus_2_time_min = bus_2_time_min + bus_2_from_offset
+                      let new_bus_2_time_hr = Math.floor(bus_2_time_hr) +
+                        Math.floor(temp_bus_2_time_min/60)
+                      let new_bus_2_time_min = temp_bus_2_time_min%60
+
+
+
+                      //Compare
+                      if( (new_bus_2_time_hr > new_bus_1_time_hr) ||
+                        (new_bus_2_time_hr == new_bus_1_time_hr &&
+                          new_bus_2_time_min > new_bus_1_time_min) ){
+
+                      //console.log("bus_1_to =>"+new_bus_1_time_hr+ " "+
+                        //  new_bus_1_time_min)
+                      //console.log("bus_2_from =>"+new_bus_2_time_hr+ " "+
+                        //    new_bus_2_time_min)
+
+                          //************** Print *************//
+              /*          console.log(bus_1+" - "+bus_1_type+" On "+route_1 + " | " +
+                           mark_from_1 + " " + mark_to_1
+                           + " | " + bus_1_time + " | "+waypoint+" | " + bus_2_time +
+                           " | " + mark_from_2 + " " + mark_to_2 + " | " +
+                          bus_2+" - "+bus_2_type+" On "+route_2)
+
+                          console.log(bus_1_from_offset, bus_1_to_offset)
+                          console.log(bus_2_from_offset, bus_2_to_offset)
+
+                          console.log(travel_time)
+
+                          console.log(new_bus_1_time_hr+ " " + new_bus_1_time_min)
+                          console.log(new_bus_2_time_hr+ " " + new_bus_2_time_min)
+*/
+                          //************* Print ends ***********//
+
+                          //add padding to min (time)
+                          if(new_bus_1_time_min < 10){
+                            new_bus_1_time_min = "0" + new_bus_1_time_min
+                          }
+                          if(new_bus_2_time_min < 10){
+                            new_bus_2_time_min = "0" + new_bus_2_time_min
+                          }
+                          if(new_from_bus_1_time_min < 10){
+                            new_from_bus_1_time_min = "0" + new_from_bus_1_time_min
+                          }
+
+
+                          let add_to_travel_time_min
+                          let add_to_travel_time_hr
+                          let add_to_travel_time_min_final
+                          //more on travel_time
+                          if(new_bus_1_time_min > new_bus_2_time_min){ //problem
+                            new_bus_2_time_min = parseInt(new_bus_2_time_min) + 60
+                            //console.log(new_bus_2_time_min)
+                            new_bus_2_time_hr = new_bus_2_time_hr - 1
+                            //console.log(new_bus_2_time_hr )
+
+                            add_to_travel_time_min =
+                              new_bus_2_time_min - parseInt(new_bus_1_time_min)
+                            add_to_travel_time_hr =
+                              new_bus_2_time_hr - new_bus_1_time_hr
+                            add_to_travel_time_min_final = 60 * add_to_travel_time_hr
+                              + add_to_travel_time_min
+                          }else{
+                              add_to_travel_time_min =
+                                new_bus_2_time_min - new_bus_1_time_min
+                              add_to_travel_time_hr =
+                                new_bus_2_time_hr - new_bus_1_time_hr
+                              add_to_travel_time_min_final = 60 * add_to_travel_time_hr
+                                + add_to_travel_time_min
+
+                          }
+                        //  console.log("addition-> " + add_to_travel_time_min_final)
+                          travel_time = travel_time + add_to_travel_time_min_final
+
+
+                          let travel_time_hr =''
+                          if(travel_time >= 60)
+                            travel_time_hr  = parseInt(travel_time/60) + " hr "
+                          else
+                            travel_time_hr  = ''
+
+                          let travel_time_min = travel_time%60
+                          if(travel_time_min >= 10)
+                            travel_time_min = travel_time_min+ " min "
+                          else
+                            travel_time_min = "0"+travel_time_min+ " min "
+
+                          //Push to DOM
+                          let indirect_bus_obj = {
+                            bus_1_no : bus_1,
+                            bus_1_type : bus_1_type,
+
+
+                            bus_2_no : bus_2,
+                            bus_2_type:bus_2_type,
+
+                            travel_time : travel_time_hr + " " + travel_time_min,
+
+                            next_schedule : new_from_bus_1_time_hr + ":" +
+                              new_from_bus_1_time_min
+                          }
+
+                          this.indirect_bus_arr.push(indirect_bus_obj)
+                          this.$store.state.show_p_bar = false
+
+                          break
+                      }
+                    }
+
+
+                  }
+
+                  break
+                }
+              }
+
+              return response.json()
+            })
+            .then(response=>{
+              //error
+            })
+
+            break
+          }
+        }
+
+        return response.json()
+      })
+      .then(response=>{
+        //error
+      })
+    }
+  },
+  //METHODS ends
+
+  computed:{
+    ...mapGetters([
+      'show_p_bar'
+    ]),
+    sorted_indirect_bus_arr: function() {
+      function compare(bus1, bus2) {
+        if (bus1.travel_time < bus2.travel_time)
+          return -1;
+        if (bus1.travel_time > bus2.travel_time)
+          return 1;
+        return 0;
+      }
+
+      return this.indirect_bus_arr.sort(compare);
+    }
+  },
+  //COMPUTED ends
+
+  mounted(){
+    this.get_indirect_routes()
+  }
+  //MOUNTED ends
+}
+</script>
+
+<style scoped>
+</style>

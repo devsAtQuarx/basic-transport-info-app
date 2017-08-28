@@ -1,0 +1,338 @@
+<template>
+  <div>
+    <div class="preloader" v-if="show_p_bar"></div>
+    <router-link to="/">{{from_city.name}}</router-link>
+    <router-link to="/to_city">{{to_city.name}}</router-link>
+    <button @click="swap_from_to">swap</button>
+
+    <ul>
+      <li v-for="bus in sorted_bus_arr">
+        {{bus.no}} -
+        {{bus.type}} -
+        {{bus.next_schedule}} -
+        {{bus.travel_time}}
+        <button @click="show_detail(bus)">detail ></button>
+      </li>
+    </ul>
+    <two_bus_combo></two_bus_combo>
+
+  </div>
+</template>
+
+<script>
+import {mapGetters} from 'vuex'
+import two_bus_combo from './2.1_two_bus_combo'
+
+export default{
+  data(){
+    return{
+      bus_arr : [],
+      direct_bus_status : ''
+    }
+  },
+
+  methods:{
+
+    show_detail(bus){
+      this.$store.state.show_detail = bus
+      this.$router.push('/detail')
+    },
+
+    swap_from_to(){
+      let temp_city_name = ''
+      temp_city_name = this.$store.state.from_city.name
+      this.$store.state.from_city.name = this.$store.state.to_city.name
+      this.$store.state.to_city.name = temp_city_name
+      this.$router.push('/redirect')
+    },
+
+    checkDirect(){ //get routes
+      this.$store.state.show_p_bar = true
+      //this.$Progress.start()
+
+      this.$store.state.direct_bus_route_str = ''
+      this.direct_bus_status = ''
+
+      let from_city = this.$store.state.from_city
+      let to_city = this.$store.state.to_city
+
+      this.$http.get('city_route_matrix/'+from_city.name+'/'+to_city.name+'.json')
+      .then(response=>{
+        let routes = response.body
+        if(response.body != null){ //isDirect
+          //console.log(routes)
+          this.get_bus(routes) //got direct routes
+
+          return response.json()
+        }else{ //notDirect
+          this.direct_bus_status = "No Direct Bus Found on this Route"
+        //  this.$Progress.finish()
+        //this.$store.state.show_p_bar = false
+        }
+      })
+      .then(response=>{
+        //error
+      })
+    },
+    //CHECK DIRECT end
+
+    get_bus(routes){
+
+      for(let route in routes){
+        this.$store.state.direct_bus_route_str += "*"+routes[route]+"*"
+        this.$http.get('buses_on_route/'+routes[route]+'.json')
+        .then(response=>{
+          let buses = response.body
+          //console.log(buses)
+          this.get_bus_type(routes[route],buses) // call bus_type
+
+          return response.json()
+        })
+        .then(response=>{
+          //error
+        })
+      }
+    },
+    //GET BUS ends
+
+
+    get_bus_type(route, buses){
+      for(let bus in buses){
+        this.$http.get('bus_type/'+buses[bus]+'.json')
+        .then(response=>{
+          let bus_type=response.body
+          //console.log(bus_type)
+          this.mark_cities(buses[bus], bus_type, route) //call travel_time
+
+          return response.json()
+        })
+        .then(response=>{
+          //error
+        })
+      }
+    },
+    //GET_BUS_TYPE ends
+
+    mark_cities(bus_no, bus_type, route){
+      this.$http.get('bus_routes/'+route+'.json')
+      .then(response=>{
+       let cities = response.body
+       //console.log(cities)
+       let mark_from = -1 , mark_to = -1
+       for(let city in cities){
+        //mark_from
+        if(cities[city] == this.$store.state.from_city.name){
+          mark_from = city
+          //console.log(mark_from)
+        }
+        //mark_to
+        else if(cities[city] == this.$store.state.to_city.name){
+          mark_to = city
+          //console.log(mark_to)
+        }
+        //if got => both marked points => proceed
+        if(mark_from != -1 && mark_to != -1){
+          //call get_travel_time
+          this.get_travel_time(bus_no , bus_type, route, mark_from, mark_to)
+          break
+        }
+       }
+
+       return response.json()
+      })
+      .then(response=>{
+        //error
+      })
+    },
+    //MARK CITIES ends
+
+    get_travel_time(bus_no , bus_type, route, marked_from, marked_to){
+      // initial time
+      let initial_time, final_time
+      this.$http.get('travel_time_on_route/'+route+'/'+marked_from+'.json')
+      .then(response=>{
+        initial_time = response.body
+        //console.log(initial_time)
+        //final time
+        this.$http.get('travel_time_on_route/'+route+'/'+marked_to+'.json')
+        .then(response=>{
+          final_time = response.body
+          //console.log(final_time)
+          //final - initial time
+          let travel_time = final_time - initial_time
+
+
+
+
+          //call next_schedule
+          this.next_schedule(bus_no, bus_type, travel_time, final_time)
+
+          return response.json()
+        })
+        .then(response=>{
+          //error
+        })
+
+        return response.json()
+      })
+      .then(response=>{
+        //error
+      })
+
+    },
+    //GET TRAVEL TIME ends
+
+    next_schedule(bus_no, bus_type, travel_time, offset){
+      this.$http.get('bus_time_from_origin/'+bus_no+'.json')
+      .then(response=>{
+        let all_schedule = response.body
+
+        let next_schedule_found = false
+        for(let schedule in all_schedule){
+
+          //schedule time
+          let schedule_hr =
+            all_schedule[schedule].substring(0, all_schedule[schedule].indexOf(":"))
+          let schedule_min =
+            all_schedule[schedule].substring(all_schedule[schedule].indexOf(":") + 1)
+
+          //add offset
+          let temp_schedule_min = schedule_min + offset
+          let new_schedule_hr = Math.floor(schedule_hr) + Math.floor(temp_schedule_min/60)
+          let new_schedule_min = temp_schedule_min%60
+
+          //current time
+          let date = new Date()
+          let hr = date.getHours()
+          let min = date.getMinutes()
+
+          //compare
+          if(new_schedule_hr > hr || (new_schedule_hr == hr && new_schedule_min > min)){
+
+            if(new_schedule_min < 10){
+              new_schedule_min = "0" + new_schedule_min
+            }
+
+            let travel_time_hr = ''
+            if(travel_time >= 60)
+              travel_time_hr  = parseInt(travel_time/60) + " hr "
+            else
+              travel_time_hr  = ''
+            let travel_time_min = travel_time%60 + " min "
+
+            let bus_obj = {
+              no : bus_no,
+              type : bus_type,
+              travel_time : travel_time_hr + " " + travel_time_min ,
+              next_schedule : new_schedule_hr+ ":" +new_schedule_min
+            }
+            this.bus_arr.push(bus_obj)
+            this.$store.state.show_p_bar = false
+
+            //*** HTML
+            /*console.log(bus_no)
+            console.log(bus_type)
+            console.log(travel_time)
+            console.log(new_schedule_hr + ":" + new_schedule_min)*/
+            //*** HTML ends
+
+            //this.$Progress.finish()
+
+            next_schedule_found = true
+            break
+          }
+        }
+
+        //
+        if(next_schedule_found == false){
+          //schedule time
+          let schedule_hr = all_schedule[0].substring(0, all_schedule[0].indexOf(":"))
+          let schedule_min = all_schedule[0].substring(all_schedule[0].indexOf(":") + 1)
+
+          //add offset
+          let temp_schedule_min = schedule_min + offset
+          let new_schedule_hr = Math.floor(schedule_hr) + Math.floor(temp_schedule_min/60)
+          let new_schedule_min = temp_schedule_min%60
+
+          if(new_schedule_min < 10){
+            new_schedule_min = "0" + new_schedule_min
+          }
+
+          let travel_time_hr =''
+          if(travel_time >= 60)
+            travel_time_hr  = parseInt(travel_time/60) + " hr "
+          else
+            travel_time_hr  = ''
+          let travel_time_min = travel_time%60 + " min "
+
+
+
+          let bus_obj = {
+            no : bus_no,
+            type : bus_type,
+            travel_time : travel_time_hr + " " + travel_time_min ,
+            next_schedule : new_schedule_hr+ ":" +new_schedule_min
+          }
+          this.bus_arr.push(bus_obj)
+          this.$store.state.show_p_bar = false
+
+          //*** HTML
+          /*console.log(bus_no)
+          console.log(bus_type)
+          console.log(travel_time)
+          console.log(new_schedule_hr+ ":" +new_schedule_min)*/
+          //*** HTML ends
+
+        }
+
+      //  this.$Progress.finish()
+        return response.json()
+      })
+      .then(response=>{
+        //error
+      })
+    },
+    //NEXT_SCHEDULE ends
+
+  },
+  //METHODS ends
+
+  computed:{
+    ...mapGetters([
+      'from_city','to_city','show_p_bar'
+    ]),
+    sorted_bus_arr: function() {
+      function compare(bus1, bus2) {
+        if (bus1.travel_time < bus2.travel_time)
+          return -1;
+        if (bus1.travel_time > bus2.travel_time)
+          return 1;
+        return 0;
+      }
+
+      return this.bus_arr.sort(compare);
+    }
+  },
+  //COMPUTED ends
+
+  beforeMount(){
+    this.checkDirect()
+  },
+  //BEFORE_MOUNT ends
+
+  components:{
+    'two_bus_combo' : two_bus_combo
+  },
+  //COMPONENTS ends
+
+  mounted(){
+
+  }
+  //MOUNTED ends
+}
+</script>
+
+<style scoped>
+
+
+</style>
