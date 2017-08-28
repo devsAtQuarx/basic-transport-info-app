@@ -1,15 +1,15 @@
-# Google-s-Delhi-Public-Transport-Clone (for Connecting Cities of Rajasthan, India)
+# Google's-Delhi-Public-Transport-Clone (for Connecting Cities of Rajasthan, India)
 
 *****************************************
 Demo Link - https://orangebusv1-38083.firebaseapp.com
 
 Accepted City Input -> 
  
- Ajmer
- Delhi
- Jaipur
- Kota 
- Mount Abu
+ Ajmer ,
+ Delhi ,
+ Jaipur ,
+ Kota ,
+ Mount Abu ,
  Udaipur
 *****************************************
 
