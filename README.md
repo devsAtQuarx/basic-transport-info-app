@@ -11,6 +11,8 @@ Accepted City Input ->
  Mount Abu 
  Udaipur
 ```
+Ajmer -> Mount Abu --> won't show any result, Its open for further development to show up 3 buses (2-hop) indirect routes.
+  
 
 > A Vue.js project
 
