@@ -17,6 +17,11 @@ Accepted City Input ->
 ```
 Ajmer -> Mount Abu --> won't show any result, Its open for further development to show up 3 buses (2-hop) indirect routes.
   
+Efficiency - 
+O(1) - Direct Buses 
+o(n) - Indirect Buses (n represents no. of cities connected directly to a particular city)
+
+o(1) - Others Details (Fetching Bus Time, Next Schedule etc from DB)  
 
 > A Vue.js project
 
