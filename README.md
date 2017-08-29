@@ -2,7 +2,7 @@
 
 Youtube Link - 
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/_XjRur3yHoA/3.jpg)](https://www.youtube.com/watch?v=_XjRur3yHoA)
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/_XjRur3yHoA/1.jpg)](https://www.youtube.com/watch?v=_XjRur3yHoA)
 
 Demo Link - https://orangebusv1-38083.firebaseapp.com
 ```
