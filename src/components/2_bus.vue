@@ -336,6 +336,7 @@
 <script>
 import {mapGetters} from 'vuex'
 import two_bus_combo from './2.1_two_bus_combo'
+import moment from 'moment'
 
 export default{
   data(){
