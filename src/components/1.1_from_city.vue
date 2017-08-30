@@ -35,7 +35,7 @@
     </v-navigation-drawer>
 
     <v-toolbar fixed class="aliceblue" dark  style="  background:#fff " >
-      <v-toolbar-side-icon  style="flaot:left" @click.native.stop="drawer = !drawer" ></v-toolbar-side-icon>
+      <v-toolbar-side-icon  style="flaot:left" @click.stop="drawer = !drawer" ></v-toolbar-side-icon>
         <div class="green--text">  <i style="font-size:2vh!important"class="material-icons md-18">&#xE061;</i></div>
 
 		  <input
@@ -65,7 +65,7 @@
 
 
 
- <main>
+ <main style="padding:0px">
     <v-container fluid>
 	  <div class="preloader" v-if="show_p_bar_from_city" style="margin-top:-4px"></div>
       <v-snackbar

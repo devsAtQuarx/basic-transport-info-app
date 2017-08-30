@@ -6,6 +6,7 @@ import router from './router'
 import {store} from './store'
 import VueResource from 'vue-resource'
 //import VueProgressBar from 'vue-progressbar'
+import 'vuetify/dist/vuetify.min.css'
 import Vuetify from 'vuetify'
 
 

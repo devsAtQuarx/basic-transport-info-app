@@ -102,21 +102,8 @@ var webpackConfig = merge(baseWebpackConfig, {
       filename: 'service-worker.js',
       staticFileGlobs: ['dist/**/*.{js,html,css}'],
       minify: true,
-      stripPrefix: 'dist/',
-      runtimeCaching: [
-     {
-       urlPattern: /^https:\/\/unpkg\.com\/vuetify\/dist\/vuetify\.min\.css\//,
-       handler: 'cacheFirst'
-     },
-  
-     {
-       urlPattern: /^https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/moment\.js\/2\.18\.1\/moment\.min\.js\//,
-       handler: 'cacheFirst'
-     },
-     {
-       urlPattern: /^https:\/\/code\.getmdl\.io\//,
-       handler: 'cacheFirst'
-     }]
+      stripPrefix: 'dist/'
+
     })
   ]
 })

@@ -38,40 +38,40 @@
 
 
     <v-toolbar fixed class="aliceblue" dark  style="  background:#fff " >
-      <v-toolbar-side-icon  style="flaot:left;;    color: grey;" @click.native.stop="drawer = !drawer" ></v-toolbar-side-icon>
-   
-	
-	  
+      <v-toolbar-side-icon  style="flaot:left;;    color: grey;" @click.stop="drawer = !drawer" ></v-toolbar-side-icon>
+
+
+
       <div id="shwsource" style="margin-top:0px;color:#616a6b" v-ripple >
-		<span @click="click_source"> 
+		<span @click="click_source">
 		<i style="font-size:2vh!important;margin-top:-2px"class="material-icons md-18 green--text">&#xE061;</i>
-		{{from_city.name}} 
+		{{from_city.name}}
 			<br>
 		<span style="font-size:9px;color:grey;float:right;margin-top:-5px">Change City</span>
 		</span>
 	  </div>
-      
+
 	  <p id="arrow" style="margin-top:15px;color:grey">  <i class="material-icons">keyboard_arrow_right</i></p>
-      
-	  
+
+
       <div id="shwsource" style="margin-top:0px;color:#616a6b" v-ripple>
 		<span @click="click_dest">
 		<i style="font-size:2vh!important;margin-top:-2px" class="material-icons md-18 red--text">&#xE061;</i>
-			{{to_city.name}} 
+			{{to_city.name}}
 			<br>
 		<span style="font-size:9px;color:grey;float:right;margin-top:-5px;">Change City</span>
 		</span>
 	  </div>
-      
+
 	  <v-spacer></v-spacer>
       <div class="black--text"  @click="swap_from_to" style="cursor:pointer;    color: grey;" v-ripple>  <i class="material-icons">swap_vert</i></div>
-	
-    
+
+
 	</v-toolbar>
-	
 
 
-   <main>
+
+   <main  style="padding:0px">
   <v-container fluid >
 
   <div class="preloader" v-if="show_p_bar" style="margin-top:-5px"></div>
@@ -81,7 +81,7 @@
         <div slot="header" @click="detail=true; timetable=false;" style="width:100%;" v-ripple>
 
         <!-- Bus icon by Icons8 -->
-	
+
       <img class="icon icons8-Bus" width="28" height="24" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAC/ElEQVRoQ+1ZS0wTURQ909qPFixVoiEpIhIhJhh1QbpRoGqXGBN1gav6WbkxrjTRaE000ZV7o1Jjggs1UVm4qLGAbogLJbgBUxHFIBEsiNV+pM/p0KmltPPpex0tzls1M+/ce84798570+FQ5oMrc/7QBfxtB2UdIEFUgTN3geP2a0qWkIcg8SOcGzNSeeUF9FqCfKG1a0o+k4w84trikgsnL6DPQlLxzj7uwP3guCY6DrqduLyvR8jFtcUkOSoW0HRqhybkxSTD116VRkDrvVHFQvoP1QtzczHidalAugBxdUi6B5ZNCSmuH8qJzEvIPzFESUkd3FuzlW0T6wLUGQDdgdyn0LIqoalwDF/D0bxFscZhRbXDkveeGhx1CZE+s48/iVxYYELgn3iTITXyblayohs32fPeV4Pz1jSnTkLpOOQif6jj+SwdBc9C4gYmQrJLSA2R7JRqcKIDIr7QoU4XkM9WqRIa//QNnyfn8D2SEKAVNhPWr6tArdOObNw/50AsNo8HPcMZ4rnCU0IOdDTBYjEKtxgIYNvEwRcf8DYUhs1mRn1dFarXrhKITk3/wOjYDCKRODY3OODeuSEtgLKJc/eBJ9O3MBlvES6raUYxzvXbg8JPV4sTK60rFhnwM/oLAy/HYTYb4e1sRq31GfY4TgpzmL2RxZOVeD57CR+ju4sS0NU9hEQiKSnAZDLg/NEv2GU/B7Nhjq2AfM2qxTVmDmhBNl8OXUDujqy1E2wdMFYCDVcAhwcIB4DQGWB+odmKHjIx2QrYcgdY7frDNfyUf6aeKJq7AJSJyVaAa2Qp2YFGOgEyMdkKKHsHhHq9yvfAXr4H+PIJnWbUA4VjsnWArliKQusCSK/lPf9mV1fU8tGCCMa49thGqTDyf6/3m7xIGnyai+DJw5D0ca0JP5UAEew5fFz40JE7At03ZBdBigBtXMXJaRMVEkEb9z8S0HnsNf+lctuilSRkMHD35naaXvVQxlXsAA3JUmJ1AaVcXSWxdQeUrFIp5/wG5XWsQAI+GqoAAAAASUVORK5CYII=">
 
 		  <span style="font-size:18px;font-weight:400">
