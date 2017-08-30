@@ -31,8 +31,8 @@
 
 			  <span style="font-size:8px">{{bus.bus_1_type}}</span>
 
-              <span ><i class="material-icons" style="font-size:12px;color:grey;margin-left:5px">&#xE409;</i></span>
-			  <br>
+              <span ><i class="material-icons" style="font-size:12px;color:grey;margin-left:0px">&#xE409;</i></span>
+			  
 
               <!-- Bus icon by Icons8 -->
     <img style="" class="icon icons8-Bus" width="28" height="24" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAC/ElEQVRoQ+1ZS0wTURQ909qPFixVoiEpIhIhJhh1QbpRoGqXGBN1gav6WbkxrjTRaE000ZV7o1Jjggs1UVm4qLGAbogLJbgBUxHFIBEsiNV+pM/p0KmltPPpex0tzls1M+/ce84798570+FQ5oMrc/7QBfxtB2UdIEFUgTN3geP2a0qWkIcg8SOcGzNSeeUF9FqCfKG1a0o+k4w84trikgsnL6DPQlLxzj7uwP3guCY6DrqduLyvR8jFtcUkOSoW0HRqhybkxSTD116VRkDrvVHFQvoP1QtzczHidalAugBxdUi6B5ZNCSmuH8qJzEvIPzFESUkd3FuzlW0T6wLUGQDdgdyn0LIqoalwDF/D0bxFscZhRbXDkveeGhx1CZE+s48/iVxYYELgn3iTITXyblayohs32fPeV4Pz1jSnTkLpOOQif6jj+SwdBc9C4gYmQrJLSA2R7JRqcKIDIr7QoU4XkM9WqRIa//QNnyfn8D2SEKAVNhPWr6tArdOObNw/50AsNo8HPcMZ4rnCU0IOdDTBYjEKtxgIYNvEwRcf8DYUhs1mRn1dFarXrhKITk3/wOjYDCKRODY3OODeuSEtgLKJc/eBJ9O3MBlvES6raUYxzvXbg8JPV4sTK60rFhnwM/oLAy/HYTYb4e1sRq31GfY4TgpzmL2RxZOVeD57CR+ju4sS0NU9hEQiKSnAZDLg/NEv2GU/B7Nhjq2AfM2qxTVmDmhBNl8OXUDujqy1E2wdMFYCDVcAhwcIB4DQGWB+odmKHjIx2QrYcgdY7frDNfyUf6aeKJq7AJSJyVaAa2Qp2YFGOgEyMdkKKHsHhHq9yvfAXr4H+PIJnWbUA4VjsnWArliKQusCSK/lPf9mV1fU8tGCCMa49thGqTDyf6/3m7xIGnyai+DJw5D0ca0JP5UAEew5fFz40JE7At03ZBdBigBtXMXJaRMVEkEb9z8S0HnsNf+lctuilSRkMHD35naaXvVQxlXsAA3JUmJ1AaVcXSWxdQeUrFIp5/wG5XWsQAI+GqoAAAAASUVORK5CYII=">
