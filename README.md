@@ -1,4 +1,4 @@
-# Google's-Delhi-Public-Transport-Clone (for Connecting Cities of Rajasthan, India)
+# Google's-Delhi-Public-Transport-Clone
 
 Youtube Link - https://www.youtube.com/watch?v=_XjRur3yHoA
 
