@@ -1,6 +1,6 @@
 # Google's-Delhi-Public-Transport-Clone
 
-Youtube Link - https://www.youtube.com/watch?v=_XjRur3yHoA
+Youtube Link - https://youtu.be/XCsMBFTELJ8 
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/_XjRur3yHoA/0.jpg)](https://youtu.be/XCsMBFTELJ8)
 
